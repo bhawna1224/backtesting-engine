@@ -39,8 +39,14 @@ class BacktestEngine:
             - 'cumulative_returns' Series
             - 'portfolio_value' Series
         """
+        # Convert both DataFrames to have consistent single-level datetime index
+        price_data = self.price_data.copy()
+        price_data.index = pd.to_datetime(price_data.index)
+        signals = self.signals.copy()
+        signals.index = pd.to_datetime(signals.index)
+        
         # Join price data with signals
-        joined_data = self.price_data.join(self.signals).dropna()
+        joined_data = price_data.join(signals).dropna()
         
         # Calculate asset returns
         joined_data['asset_returns'] = joined_data['Close'].pct_change()
