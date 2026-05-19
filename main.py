@@ -17,6 +17,9 @@ def main():
     )
     price_data = data_loader.fetch_data()
     
+    # Ensure single-level datetime index
+    price_data.index = pd.to_datetime(price_data.index)
+    
     # Step 2: Initialize strategy
     print("\nInitializing Moving Average Crossover Strategy...")
     strategy = MovingAverageCrossoverStrategy(
@@ -28,6 +31,9 @@ def main():
     # Step 3: Generate signals
     print("\nGenerating trading signals...")
     signals = strategy.generate_signals()
+    
+    # Ensure signals has same index as price data
+    signals.index = pd.to_datetime(signals.index)
     
     # Step 4: Run backtest
     print("\nRunning backtest...")
