@@ -54,8 +54,8 @@ def main():
     print("\nFirst 10 returns:")
     print(results['returns'].head(10))
     
-    print(f"\nFinal cumulative return: {results['cumulative_returns'][-1]:.2%}")
-    print(f"Final portfolio value: ${results['portfolio_value'][-1]:,.2f}")
+    print(f"\nFinal cumulative return: {results['cumulative_returns'].iloc[-1]:.2%}")
+    print(f"Final portfolio value: ${results['portfolio_value'].iloc[-1]:,.2f}")
 
 if __name__ == "__main__":
     main()
