@@ -41,12 +41,20 @@ class BacktestEngine:
         """
         # Convert both DataFrames to have consistent single-level datetime index
         price_data = self.price_data.copy()
-        price_data.index = pd.to_datetime(price_data.index)
         signals = self.signals.copy()
+        
+        # Convert MultiIndex columns to single level if present
+        if isinstance(price_data.columns, pd.MultiIndex):
+            price_data.columns = price_data.columns.get_level_values(0)
+        if isinstance(signals.columns, pd.MultiIndex):
+            signals.columns = signals.columns.get_level_values(0)
+            
+        # Ensure datetime index
+        price_data.index = pd.to_datetime(price_data.index)
         signals.index = pd.to_datetime(signals.index)
         
         # Join price data with signals
-        joined_data = price_data.join(signals).dropna()
+        joined_data = price_data.join(signals, how='inner').dropna()
         
         # Calculate asset returns
         joined_data['asset_returns'] = joined_data['Close'].pct_change()
