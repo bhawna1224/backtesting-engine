@@ -17,7 +17,9 @@ def main():
     )
     price_data = data_loader.fetch_data()
     
-    # Ensure single-level datetime index
+    # Convert MultiIndex to single-level datetime index
+    if isinstance(price_data.index, pd.MultiIndex):
+        price_data.index = price_data.index.get_level_values(0)
     price_data.index = pd.to_datetime(price_data.index)
     
     # Step 2: Initialize strategy
