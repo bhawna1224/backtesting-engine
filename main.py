@@ -1,19 +1,32 @@
 from data.data_loader import MarketDataLoader
 from strategies.moving_average_crossover import MovingAverageCrossoverStrategy
 from engine.backtest import BacktestEngine
+from analytics.performance import PerformanceAnalyzer
+from analytics.plotting import BacktestPlotter
 import pandas as pd
+import argparse
 
 def main():
     """
     Main function to test the vectorized backtesting engine.
     Downloads AAPL data, runs MA crossover strategy, and prints results.
     """
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description="Run backtest with Moving Average Crossover Strategy")
+    parser.add_argument('--ticker', type=str, default='AAPL', help='Stock ticker symbol')
+    parser.add_argument('--start', type=str, default='2020-01-01', help='Start date (YYYY-MM-DD)')
+    parser.add_argument('--end', type=str, default='2024-01-01', help='End date (YYYY-MM-DD)')
+    parser.add_argument('--capital', type=float, default=100000, help='Initial capital')
+    parser.add_argument('--short_window', type=int, default=20, help='Short MA window')
+    parser.add_argument('--long_window', type=int, default=50, help='Long MA window')
+    args = parser.parse_args()
+
     # Step 1: Download historical data
-    print("Downloading AAPL historical data...")
+    print(f"Downloading {args.ticker} historical data from {args.start} to {args.end}...")
     data_loader = MarketDataLoader(
-        ticker="AAPL",
-        start_date="2020-01-01",
-        end_date="2024-01-01"
+        ticker=args.ticker,
+        start_date=args.start,
+        end_date=args.end
     )
     price_data = data_loader.fetch_data()
     
@@ -26,8 +39,8 @@ def main():
     print("\nInitializing Moving Average Crossover Strategy...")
     strategy = MovingAverageCrossoverStrategy(
         data=price_data,
-        short_window=20,
-        long_window=50
+        short_window=args.short_window,
+        long_window=args.long_window
     )
     
     # Step 3: Generate signals
@@ -42,20 +55,32 @@ def main():
     backtest = BacktestEngine(
         price_data=price_data,
         signals=signals,
-        initial_capital=100000
+        initial_capital=args.capital
     )
     results = backtest.run_backtest()
     
-    # Step 5: Print results
-    print("\n=== Results ===")
-    print("\nFirst 10 signals:")
-    print(signals.head(10))
+    # Step 5: Performance analysis
+    print("\n=== Performance Analysis ===")
+    analyzer = PerformanceAnalyzer(
+        strategy_returns=results['returns']['strategy_returns'],
+        cumulative_returns=results['cumulative_returns']
+    )
     
-    print("\nFirst 10 returns:")
-    print(results['returns'].head(10))
+    total_return = analyzer.calculate_total_return()
+    annual_return = analyzer.calculate_annualized_return()
+    sharpe_ratio = analyzer.calculate_sharpe_ratio()
+    max_drawdown, drawdown_start, drawdown_end = analyzer.calculate_max_drawdown()
     
-    print(f"\nFinal cumulative return: {results['cumulative_returns'].iloc[-1]:.2%}")
-    print(f"Final portfolio value: ${results['portfolio_value'].iloc[-1]:,.2f}")
+    print(f"\nTotal Return: {total_return:.2%}")
+    print(f"Annualized Return: {annual_return:.2%}")
+    print(f"Sharpe Ratio: {sharpe_ratio:.2f}")
+    print(f"Max Drawdown: {max_drawdown:.2%} ({drawdown_start} to {drawdown_end})")
+    
+    # Step 6: Visualization
+    print("\nGenerating visualizations...")
+    plotter = BacktestPlotter(price_data, signals, results['cumulative_returns'])
+    plotter.plot_equity_curve(title=f"{args.ticker} Strategy Equity Curve")
+    plotter.plot_price_with_signals(title=f"{args.ticker} Price with Signals")
 
 if __name__ == "__main__":
     main()
