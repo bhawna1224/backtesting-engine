@@ -66,13 +66,15 @@ class BacktestEngine:
         joined_data['strategy_returns'] = (joined_data['positions'] * 
                                          joined_data['asset_returns'])
         
-        # Calculate cumulative returns
+        # Calculate cumulative returns using compounded growth
         joined_data['cumulative_returns'] = (
-            1 + joined_data['strategy_returns']).cumprod() - 1
+            (1 + joined_data['strategy_returns']).cumprod() - 1
+        )
         
-        # Calculate portfolio value
+        # Calculate portfolio value starting from 1.0
         joined_data['portfolio_value'] = (
-            self.initial_capital * (1 + joined_data['strategy_returns']).cumprod())
+            self.initial_capital * (1 + joined_data['cumulative_returns'])
+        )
         
         return {
             'returns': joined_data[['asset_returns', 'strategy_returns']],
