@@ -39,7 +39,7 @@ class PerformanceAnalyzer:
         float
             Total return as a decimal (e.g., 0.10 for 10%)
         """
-        return self.cumulative_returns.iloc[-1]
+        return self.cumulative_returns.iloc[-1]-1
     
     def calculate_annualized_return(self) -> float:
         """

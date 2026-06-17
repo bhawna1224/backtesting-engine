@@ -20,11 +20,13 @@ class BacktestPlotter:
         self,
         price_data: pd.DataFrame,
         signals: pd.DataFrame,
-        cumulative_returns: pd.Series
+        cumulative_returns: pd.Series,
+        benchmark_cumulative_returns: pd.Series
     ):
         self.price_data = price_data
         self.signals = signals
         self.cumulative_returns = cumulative_returns
+        self.benchmark_cumulative_returns = benchmark_cumulative_returns
         
     def plot_equity_curve(self, title: Optional[str] = "Equity Curve") -> None:
         """
@@ -36,7 +38,17 @@ class BacktestPlotter:
             Plot title (default "Equity Curve")
         """
         plt.figure(figsize=(12, 6))
-        plt.plot(self.cumulative_returns, label="Strategy Equity")
+        plt.plot(
+            self.cumulative_returns,
+            label="Strategy"
+        )
+
+        plt.plot(
+            self.benchmark_cumulative_returns,
+            label="Buy & Hold"
+        )
+
+        plt.legend()
         plt.title(title)
         plt.xlabel("Date")
         plt.ylabel("Cumulative Returns")

@@ -65,20 +65,64 @@ def main():
         strategy_returns=results['returns']['strategy_returns'],
         cumulative_returns=results['cumulative_returns']
     )
-    
+    benchmark_analyzer = PerformanceAnalyzer(
+        results['returns']['benchmark_returns'],
+        results['benchmark_cumulative_returns']
+    )
     total_return = analyzer.calculate_total_return()
     annual_return = analyzer.calculate_annualized_return()
     sharpe_ratio = analyzer.calculate_sharpe_ratio()
     max_drawdown, drawdown_start, drawdown_end = analyzer.calculate_max_drawdown()
-    
+    print("\n=== Strategy ===")
     print(f"\nTotal Return: {total_return:.2%}")
     print(f"Annualized Return: {annual_return:.2%}")
     print(f"Sharpe Ratio: {sharpe_ratio:.2f}")
     print(f"Max Drawdown: {max_drawdown:.2%} ({drawdown_start} to {drawdown_end})")
-    
+    print("\n=== Buy & Hold Benchmark ===")
+    print(f"Total Return: {benchmark_analyzer.calculate_total_return():.2%}")
+    print(f"Annualized Return: {benchmark_analyzer.calculate_annualized_return():.2%}")
+    print(f"Sharpe Ratio: {benchmark_analyzer.calculate_sharpe_ratio():.2f}")
+    print("\n=== Trade Summary ===")
+
+    summary = results["trade_summary"]
+
+    print(
+        f"Total Trades: "
+        f"{summary['total_trades']}"
+    )
+
+    print(
+        f"Win Rate: "
+        f"{summary['win_rate']:.2%}"
+    )
+
+    print(
+        f"Average Trade Return: "
+        f"{summary['average_trade_return']:.2%}"
+    )
+
+    print(
+        f"Average Holding Period: "
+        f"{summary['average_holding_period']:.1f} days"
+    )
+    print("\n=== First Trades ===")
+    print(results["trade_log"].head())
+    print(
+        f"Best Trade: "
+        f"{summary['best_trade']:.2%}"
+    )
+
+    print(
+        f"Worst Trade: "
+        f"{summary['worst_trade']:.2%}"
+    )
+    print(
+        f"Profit Factor: "
+        f"{summary['profit_factor']:.2f}"
+    )
     # Step 6: Visualization
     print("\nGenerating visualizations...")
-    plotter = BacktestPlotter(price_data, signals, results['cumulative_returns'])
+    plotter = BacktestPlotter(price_data, signals, results['cumulative_returns'], results['benchmark_cumulative_returns'])
     plotter.plot_equity_curve(title=f"{args.ticker} Strategy Equity Curve")
     plotter.plot_price_with_signals(title=f"{args.ticker} Price with Signals")
 
